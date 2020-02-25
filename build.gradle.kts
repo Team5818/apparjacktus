@@ -69,6 +69,7 @@ bintray {
         name = "apparjacktus"
         userOrg = "team5818"
         vcsUrl = "https://github.com/Team5818/apparjacktus.git"
+        publish = true
         with(version) {
             name = project.version.toString()
         }
