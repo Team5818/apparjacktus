@@ -3,6 +3,7 @@ import com.techshroom.inciseblue.commonLib
 plugins {
     `java-library`
     id("com.techshroom.incise-blue") version "0.5.7"
+    id("net.researchgate.release") version "2.8.1"
     id("com.jfrog.bintray") version "1.8.4"
     `maven-publish`
     signing
@@ -36,6 +37,14 @@ dependencies {
     implementation("edu.wpi.first.hal:hal-java:$wpiVersion")
 }
 
+release {
+    tagTemplate = "v\${version}"
+    buildTasks = listOf<String>()
+}
+
+java.withJavadocJar()
+java.withSourcesJar()
+
 publishing {
     publications {
         register<MavenPublication>("library") {
@@ -52,8 +61,8 @@ publishing {
 }
 
 bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
+    user = System.getenv("BINTRAY_USER") ?: findProperty("bintray.user")?.toString()
+    key = System.getenv("BINTRAY_KEY") ?: findProperty("bintray.password")?.toString()
     setPublications("library")
     with(pkg) {
         repo = "maven-release"
