@@ -70,6 +70,7 @@ bintray {
         userOrg = "team5818"
         vcsUrl = "https://github.com/Team5818/apparjacktus.git"
         publish = true
+        setLicenses("GPL-3.0-or-later")
         with(version) {
             name = project.version.toString()
         }
