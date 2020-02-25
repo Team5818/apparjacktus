@@ -39,7 +39,7 @@ dependencies {
 
 release {
     tagTemplate = "v\${version}"
-    buildTasks = listOf<String>()
+    buildTasks = listOf<String>("build")
 }
 
 java.withJavadocJar()
