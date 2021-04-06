@@ -1,19 +1,25 @@
-import com.techshroom.inciseblue.commonLib
+import org.cadixdev.gradle.licenser.LicenseExtension
 
 plugins {
     `java-library`
-    id("com.techshroom.incise-blue") version "0.5.7"
-    id("net.researchgate.release") version "2.8.1"
-    id("com.jfrog.bintray") version "1.8.4"
     `maven-publish`
-    signing
+    id("net.researchgate.release") version "2.8.1"
+    id("org.cadixdev.licenser") version "0.5.1"
 }
 
-inciseBlue {
-    ide()
-    license()
-    util {
-        javaVersion = JavaVersion.VERSION_11
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "WPI"
+        url = uri("https://frcmaven.wpi.edu/artifactory/release")
     }
 }
 
@@ -27,14 +33,22 @@ repositories {
 dependencies {
     api("com.techshroom:greenish-jungle:0.0.3")
 	api("org.slf4j:slf4j-api:1.7.25")
-	commonLib("ch.qos.logback", "logback", "1.2.3") {
-        api(lib("classic"))
-        api(lib("core"))
-	}
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("ch.qos.logback:logback-core:1.2.3")
     val wpiVersion = "2020.3.2"
     api("edu.wpi.first.wpilibj:wpilibj-java:$wpiVersion")
     implementation("edu.wpi.first.ntcore:ntcore-java:$wpiVersion")
     implementation("edu.wpi.first.hal:hal-java:$wpiVersion")
+}
+
+configure<LicenseExtension> {
+    header = rootProject.file("HEADER.txt")
+    (this as ExtensionAware).extra.apply {
+        set("name", rootProject.name)
+        for (key in listOf("organization", "url")) {
+            set(key, rootProject.property(key))
+        }
+    }
 }
 
 release {
@@ -42,44 +56,19 @@ release {
     buildTasks = listOf<String>("build")
 }
 
-java.withJavadocJar()
-java.withSourcesJar()
-
 publishing {
     publications {
         register<MavenPublication>("library") {
-            pom {
-                name.set("apparjacktus")
-            }
-            groupId = "org.rivierarobotics.apparjacktus"
-            artifactId = "apparjacktus"
-            version = project.version.toString()
-
             from(components["java"])
         }
     }
-}
-
-bintray {
-    user = System.getenv("BINTRAY_USER") ?: findProperty("bintray.user")?.toString()
-    key = System.getenv("BINTRAY_KEY") ?: findProperty("bintray.password")?.toString()
-    setPublications("library")
-    with(pkg) {
-        repo = "maven-release"
-        name = "apparjacktus"
-        userOrg = "team5818"
-        vcsUrl = "https://github.com/Team5818/apparjacktus.git"
-        publish = true
-        setLicenses("GPL-3.0-or-later")
-        with(version) {
-            name = project.version.toString()
+    repositories {
+        maven {
+            val releasesRepoUrl = "https://maven.octyl.net/repository/team5818-releases"
+            val snapshotsRepoUrl = "https://maven.octyl.net/repository/team5818-snapshots"
+            name = "octylNet"
+            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+            credentials(PasswordCredentials::class)
         }
-    }
-}
-
-project.configure<SigningExtension> {
-    // Only sign if it's possible.
-    if (this.signatories.getDefaultSignatory(project) != null) {
-        sign(project.publishing.publications.getByName("library"))
     }
 }

@@ -1,13 +1,12 @@
-name: Gradle Build
+name: Publish Release
+
 on:
   push:
-    branches:
-      - '*'
-  pull_request:
-    types: [opened, reopened, synchronize]
+    tags:
+      - 'v*'
 
 jobs:
-  build:
+  publish-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,11 +15,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Build with Gradle
-        run: ./gradlew -s build
-      - name: Publish Snapshot
-        if: github.ref == 'refs/heads/master'
+      - name: Publish artifact
         env:
           ORG_GRADLE_PROJECT_octylNetUsername: Team5818-GitHub-Uploader
           ORG_GRADLE_PROJECT_octylNetPassword: ${{ secrets.TEAM5818_NEXUS_KEY }}
-        run: ./gradlew -s publish
+        run: ./gradlew -s build publish
