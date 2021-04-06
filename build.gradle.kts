@@ -23,13 +23,6 @@ repositories {
     }
 }
 
-repositories {
-    maven {
-        name = "WPI Maven"
-        url = uri("https://frcmaven.wpi.edu/artifactory/release")
-    }
-}
-
 dependencies {
     api("com.techshroom:greenish-jungle:0.0.3")
 	api("org.slf4j:slf4j-api:1.7.25")
